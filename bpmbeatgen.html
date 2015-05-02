@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- Super simple BPM tapper / beatfile generator compatible with Crypt of the Necrodancer
+     https://github.com/grantek/bpmbeatgen     
+ -->
+<html>
+<head>
+<title>BPM tapper / beatfile generator</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<script type="text/javascript">
+<!--
+var bpmenabled = true;
+var beatcount = 0;
+var inims = 0;
+var prems = 0;
+var curms = 0;
+var bpm = 0;
+var songlen = 0;
+var autoreset = 2;
+var offset = 0;
+document.onkeypress = UpdateBPM;
+
+function ResetBPM() {
+ beatcount = 0;
+ document.BEATFILE.BPMAVG.value = "";
+ document.BEATFILE.ROUNDED.value = "";
+ document.BEATFILE.TAPS.value = "";
+ document.BEATFILE.RESET.blur();
+}
+
+function UpdateBPM(key) {
+ if(bpmenabled == false) { return true; } else {
+ walltime = new Date;
+ curms = walltime.getTime();
+ if((curms - prems) > 1000 * autoreset) { beatcount = 0; }
+ if(beatcount == 0) {
+  inims=curms;
+  prems=curms;
+  document.BEATFILE.BPMAVG.value = "Begin";
+  document.BEATFILE.ROUNDED.value = "Begin";
+  beatcount++;
+  document.BEATFILE.TAPS.value = beatcount;
+ } else {
+  bpm = beatcount * 60 * 1000 / (curms - inims);
+  prems=curms;
+  document.BEATFILE.BPMAVG.value = Math.round(bpm * 1000) / 1000;
+  document.BEATFILE.ROUNDED.value = Math.round(bpm);
+  document.BEATFILE.MANUALBPM.value = document.BEATFILE.ROUNDED.value;
+  beatcount++;
+  document.BEATFILE.TAPS.value = beatcount;
+ }
+ return true;
+} }
+
+function GenBeatFile() {
+ bpm=parseFloat(document.BEATFILE.MANUALBPM.value);
+ songlen=parseFloat(document.BEATFILE.MANUALLENGTH.value);
+ offset=parseFloat(document.BEATFILE.OFFSET.value);
+ var curbeat=offset;
+ var incr=songlen;
+ document.BEATFILE.BEATOUT.value="";
+ 
+ if(!isNaN(bpm) && !isNaN(songlen) && !isNaN(offset) && bpm > 0 && songlen > 0 && offset >= 0) {
+  incr=Math.round(60/bpm * 1000) / 1000;
+  curbeat=offset;
+  while(curbeat < songlen) {
+   document.BEATFILE.BEATOUT.value += curbeat + "\n";
+   curbeat=Math.round((curbeat+incr) * 1000) / 1000;
+  }
+ } else {
+  document.BEATFILE.BEATOUT.value=bpm + "asdffsda";
+ }
+ return true;
+}
+
+function bpmenable() {
+ bpmenabled = true;
+}
+
+function bpmdisable() {
+ bpmenabled = false;
+}
+-->
+</script>
+</head>
+<body>
+<h2>BPM Tapper</h2>
+<p>Press any key to start tapping out BPM. BPM resets after 2 seconds</p>
+<form name="BEATFILE" action="">
+<p>Average BPM: <input readonly name="BPMAVG" size=12></p>
+<p>Rounded BPM: <input readonly name="ROUNDED" size=12></p>
+<p>Taps: <input readonly name="TAPS" size=12></p>
+<p>If you need to put the cursor somewhere, here: <input name="ASDF" size=2 maxlength=1></p>
+<h2>Generate beat file (compatible with Crypt of the Necrodancer):</h2>
+<p>BPM: <input name="MANUALBPM" size=12 onfocus="bpmdisable()" onblur="bpmenable()"></p>
+<p>Song length in seconds: <input name="MANUALLENGTH" size=12 value="120" onfocus="bpmdisable()" onblur="bpmenable()"></p>
+<p>Offset: <input name="OFFSET" size=12 value="0" onfocus="bpmdisable()" onblur="bpmenable()"></p>
+<p><input type="button" name="GBF" value="GENERATE" onclick="GenBeatFile()"></p>
+<p>Copy the generated text below and place it in a file called &quot;songname.mp3.txt&quot; in the data\custom_music folder of the game</p>
+<textarea cols=100 rows=100 name="BEATOUT" onfocus="bpmdisable()" onblur="bpmenable()"></textarea>
+</form>
+</body>
+</html>
+
